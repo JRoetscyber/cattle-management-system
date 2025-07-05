@@ -1,5 +1,5 @@
 // Animals list component
-export default {
+const AnimalsList = {
     template: `
         <div>
             <div class="d-flex justify-content-between align-items-center mb-3">
@@ -331,3 +331,5 @@ export default {
         }
     }
 };
+
+export default AnimalsList;

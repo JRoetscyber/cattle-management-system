@@ -1,85 +1,92 @@
 from flask import Blueprint, request, jsonify
 from flask_login import login_required, current_user
 from models.animal import Animal, Breed
-from app import db
+from extensions import db
 import datetime
 
 animals_bp = Blueprint('animals', __name__)
 
 @animals_bp.route('/', methods=['GET'])
-@login_required
 def get_all_animals():
-    animals = Animal.query.all()
-    return jsonify([{
-        "id": animal.id,
-        "tag_id": animal.tag_id,
-        "name": animal.name,
-        "birth_date": animal.birth_date.isoformat() if animal.birth_date else None,
-        "gender": animal.gender,
-        "weight": animal.weight,
-        "status": animal.status,
-        "breed": animal.breed.name if animal.breed else None
-    } for animal in animals]), 200
+    try:
+        animals = Animal.query.all()
+        return jsonify([{
+            "id": animal.id,
+            "tag_id": animal.tag_id,
+            "name": animal.name,
+            "birth_date": animal.birth_date.isoformat() if animal.birth_date else None,
+            "gender": animal.gender,
+            "weight": animal.weight,
+            "status": animal.status,
+            "breed": animal.breed.name if animal.breed else None
+        } for animal in animals]), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @animals_bp.route('/<int:id>', methods=['GET'])
-@login_required
 def get_animal(id):
-    animal = Animal.query.get_or_404(id)
-    
-    # Get parent information
-    mother = animal.mother.tag_id if animal.mother else None
-    father = animal.father.tag_id if animal.father else None
-    
-    # Get offspring
-    offspring = Animal.query.filter((Animal.mother_id == animal.id) | (Animal.father_id == animal.id)).all()
-    
-    return jsonify({
-        "id": animal.id,
-        "tag_id": animal.tag_id,
-        "name": animal.name,
-        "birth_date": animal.birth_date.isoformat() if animal.birth_date else None,
-        "gender": animal.gender,
-        "weight": animal.weight,
-        "status": animal.status,
-        "breed": animal.breed.name if animal.breed else None,
-        "mother": mother,
-        "father": father,
-        "offspring": [child.tag_id for child in offspring]
-    }), 200
+    try:
+        animal = Animal.query.get_or_404(id)
+        
+        # Get parent information
+        mother = animal.mother.tag_id if animal.mother else None
+        father = animal.father.tag_id if animal.father else None
+        
+        # Get offspring
+        offspring = Animal.query.filter((Animal.mother_id == animal.id) | (Animal.father_id == animal.id)).all()
+        
+        return jsonify({
+            "id": animal.id,
+            "tag_id": animal.tag_id,
+            "name": animal.name,
+            "birth_date": animal.birth_date.isoformat() if animal.birth_date else None,
+            "gender": animal.gender,
+            "weight": animal.weight,
+            "status": animal.status,
+            "breed": animal.breed.name if animal.breed else None,
+            "mother": mother,
+            "father": father,
+            "offspring": [child.tag_id for child in offspring]
+        }), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @animals_bp.route('/', methods=['POST'])
-@login_required
 def create_animal():
-    data = request.get_json()
-    
-    # Check if tag_id already exists
-    if Animal.query.filter_by(tag_id=data['tag_id']).first():
-        return jsonify({"error": "Tag ID already exists"}), 400
-    
-    # Create new animal
-    animal = Animal(
-        tag_id=data['tag_id'],
-        name=data.get('name', ''),
-        birth_date=datetime.datetime.strptime(data['birth_date'], '%Y-%m-%d').date() if data.get('birth_date') else None,
-        gender=data['gender'],
-        weight=data.get('weight'),
-        status=data.get('status', 'active'),
-        breed_id=data.get('breed_id')
-    )
-    
-    # Set parents if provided
-    if data.get('mother_id'):
-        animal.mother_id = data['mother_id']
-    if data.get('father_id'):
-        animal.father_id = data['father_id']
-    
-    db.session.add(animal)
-    db.session.commit()
-    
-    return jsonify({
-        "message": "Animal created successfully",
-        "id": animal.id
-    }), 201
+    try:
+        data = request.get_json()
+        
+        # Check if tag_id already exists
+        if Animal.query.filter_by(tag_id=data['tag_id']).first():
+            return jsonify({"error": "Tag ID already exists"}), 400
+        
+        # Create new animal
+        animal = Animal(
+            tag_id=data['tag_id'],
+            name=data.get('name', ''),
+            birth_date=datetime.datetime.strptime(data['birth_date'], '%Y-%m-%d').date() if data.get('birth_date') else None,
+            gender=data['gender'],
+            weight=data.get('weight'),
+            status=data.get('status', 'active'),
+            breed_id=data.get('breed_id')
+        )
+        
+        # Set parents if provided
+        if data.get('mother_id'):
+            animal.mother_id = data['mother_id']
+        if data.get('father_id'):
+            animal.father_id = data['father_id']
+        
+        db.session.add(animal)
+        db.session.commit()
+        
+        return jsonify({
+            "message": "Animal created successfully",
+            "id": animal.id
+        }), 201
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
 
 @animals_bp.route('/<int:id>', methods=['PUT'])
 @login_required
@@ -134,14 +141,16 @@ def delete_animal(id):
 
 # Routes for breeds
 @animals_bp.route('/breeds', methods=['GET'])
-@login_required
 def get_breeds():
-    breeds = Breed.query.all()
-    return jsonify([{
-        "id": breed.id,
-        "name": breed.name,
-        "description": breed.description
-    } for breed in breeds]), 200
+    try:
+        breeds = Breed.query.all()
+        return jsonify([{
+            "id": breed.id,
+            "name": breed.name,
+            "description": breed.description
+        } for breed in breeds]), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @animals_bp.route('/breeds', methods=['POST'])
 @login_required

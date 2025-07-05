@@ -1,3 +1,10 @@
+// Import components
+import AnimalsList from './components/AnimalsList.js';
+import AnimalDetail from './components/AnimalDetail.js';
+import HealthRecordsList from './components/HealthRecordsList.js';
+import HealthRecordDetail from './components/HealthRecordDetail.js';
+
+// Vue Router configuration
 // Vue Router configuration
 const routes = [
     { 
@@ -42,7 +49,7 @@ const routes = [
             methods: {
                 async handleLogin() {
                     try {
-                        const response = await axios.post('/auth/login', {
+                        const response = await axios.post('/api/auth/login', {
                             username: this.username,
                             password: this.password
                         });
@@ -61,139 +68,53 @@ const routes = [
     {
         path: '/dashboard',
         component: {
-            template: `
-                <div>
-                    <h1>Dashboard</h1>
-                    <div class="row">
-                        <div class="col-md-4">
-                            <div class="card">
-                                <div class="card-header">Animals</div>
-                                <div class="card-body">
-                                    <h3>{{ animalCount }}</h3>
-                                    <p>Total animals in the system</p>
-                                    <router-link to="/animals" class="btn btn-primary">View Animals</router-link>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="card">
-                                <div class="card-header">Health Records</div>
-                                <div class="card-body">
-                                    <h3>{{ healthRecordCount }}</h3>
-                                    <p>Total health records</p>
-                                    <router-link to="/health-records" class="btn btn-primary">View Records</router-link>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="card">
-                                <div class="card-header">Upcoming Vaccinations</div>
-                                <div class="card-body">
-                                    <h3>{{ upcomingVaccinationCount }}</h3>
-                                    <p>Due in the next 30 days</p>
-                                    <router-link to="/health-records" class="btn btn-primary">View Schedule</router-link>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="row mt-4">
-                        <div class="col-md-6">
-                            <div class="card">
-                                <div class="card-header">Recent Animals</div>
-                                <div class="card-body">
-                                    <table class="table">
-                                        <thead>
-                                            <tr>
-                                                <th>Tag ID</th>
-                                                <th>Name</th>
-                                                <th>Birth Date</th>
-                                                <th>Action</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr v-for="animal in recentAnimals" :key="animal.id">
-                                                <td>{{ animal.tag_id }}</td>
-                                                <td>{{ animal.name }}</td>
-                                                <td>{{ animal.birth_date }}</td>
-                                                <td>
-                                                    <router-link :to="'/animals/' + animal.id" class="btn btn-sm btn-primary">View</router-link>
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="col-md-6">
-                            <div class="card">
-                                <div class="card-header">Recent Health Records</div>
-                                <div class="card-body">
-                                    <table class="table">
-                                        <thead>
-                                            <tr>
-                                                <th>Animal</th>
-                                                <th>Date</th>
-                                                <th>Type</th>
-                                                <th>Action</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr v-for="record in recentHealthRecords" :key="record.id">
-                                                <td>{{ record.animal_tag }}</td>
-                                                <td>{{ record.date }}</td>
-                                                <td>{{ record.record_type }}</td>
-                                                <td>
-                                                    <router-link :to="'/health-records/' + record.id" class="btn btn-sm btn-primary">View</router-link>
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `,
-            data() {
-                return {
-                    animalCount: 0,
-                    healthRecordCount: 0,
-                    upcomingVaccinationCount: 0,
-                    recentAnimals: [],
-                    recentHealthRecords: []
-                };
-            },
-            created() {
-                this.fetchDashboardData();
-            },
-            methods: {
-                async fetchDashboardData() {
-                    try {
-                        // Fetch animals
-                        const animalsResponse = await axios.get('/animals');
-                        this.animalCount = animalsResponse.data.length;
-                        this.recentAnimals = animalsResponse.data.slice(0, 5);
-                        
-                        // Fetch health records
-                        const recordsResponse = await axios.get('/health/records');
-                        this.healthRecordCount = recordsResponse.data.length;
-                        this.recentHealthRecords = recordsResponse.data.slice(0, 5);
-                        
-                        // Calculate upcoming vaccinations (simplified)
-                        this.upcomingVaccinationCount = 3; // Placeholder
-                    } catch (error) {
-                        console.error('Error fetching dashboard data:', error);
-                    }
-                }
-            }
+            // Dashboard component code
         },
         meta: {
             requiresAuth: true
         }
     },
-    // Add additional routes for animals, health records, etc.
+    {
+        path: '/animals',
+        component: AnimalsList,
+        meta: {
+            requiresAuth: true
+        }
+    },
+    {
+        path: '/animals/:id',
+        component: AnimalDetail,
+        meta: {
+            requiresAuth: true
+        }
+    },
+    {
+        path: '/health-records',
+        component: HealthRecordsList,
+        meta: {
+            requiresAuth: true
+        }
+    },
+    {
+        path: '/health-records/:id',
+        component: HealthRecordDetail,
+        meta: {
+            requiresAuth: true
+        }
+    },
+    // 404 route
+    {
+        path: '*',
+        component: {
+            template: `
+                <div class="alert alert-danger">
+                    <h1>404 - Page Not Found</h1>
+                    <p>The page you are looking for does not exist.</p>
+                    <router-link to="/" class="btn btn-primary">Go Home</router-link>
+                </div>
+            `
+        }
+    }
 ];
 
 const router = new VueRouter({
@@ -211,5 +132,3 @@ router.beforeEach((to, from, next) => {
         next();
     }
 });
-
-export default router;

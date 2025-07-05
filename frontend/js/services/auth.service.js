@@ -1,8 +1,8 @@
 // Authentication service
-export default {
+const AuthService = {
     async login(username, password) {
         try {
-            const response = await axios.post('/auth/login', {
+            const response = await axios.post('/api/auth/login', {
                 username,
                 password
             });
@@ -19,14 +19,14 @@ export default {
     },
     
     logout() {
-        axios.post('/auth/logout')
+        axios.post('/api/auth/logout')
             .catch(error => console.error('Logout error:', error));
         
         localStorage.removeItem('user');
     },
     
     register(userData) {
-        return axios.post('/auth/register', userData);
+        return axios.post('/api/auth/register', userData);
     },
     
     getCurrentUser() {

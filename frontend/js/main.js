@@ -3,6 +3,9 @@ import router from './router.js';
 import AuthService from './services/auth.service.js';
 
 // Global axios configuration
+// Main application script
+
+// Global axios configuration
 axios.defaults.baseURL = 'http://localhost:5000/api';
 axios.interceptors.request.use(
     config => {

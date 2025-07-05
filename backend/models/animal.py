@@ -1,4 +1,4 @@
-from app import db
+from extensions import db
 import datetime
 
 class Breed(db.Model):
@@ -31,7 +31,6 @@ class Animal(db.Model):
     breed = db.relationship('Breed', backref='animals')
     mother = db.relationship('Animal', remote_side=[id], backref='offspring_as_mother', foreign_keys=[mother_id])
     father = db.relationship('Animal', remote_side=[id], backref='offspring_as_father', foreign_keys=[father_id])
-    health_records = db.relationship('HealthRecord', backref='animal', lazy='dynamic')
     
     created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)

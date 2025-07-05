@@ -1,14 +1,21 @@
 import os
+from datetime import timedelta
 
-# Secret key for sessions
-SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-key-for-development-only')
+# Flask app configuration
+DEBUG = True
+SECRET_KEY = 'your-secret-key-for-sessions-and-cookies'
 
 # Database configuration
-if os.environ.get('FLASK_ENV') == 'production':
-    # PostgreSQL for production
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL', 'postgresql://user:password@localhost/cattle_management')
-else:
-    # SQLite for development
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL', 'sqlite:///../database/cattle_management.db')
-
+SQLALCHEMY_DATABASE_URI = 'sqlite:///cattle_management.db'
 SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+# Session configuration
+PERMANENT_SESSION_LIFETIME = timedelta(days=1)
+SESSION_TYPE = 'filesystem'
+SESSION_COOKIE_NAME = 'cattle_management_session'
+SESSION_COOKIE_SECURE = False  # Set to True in production with HTTPS
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = None
+
+# Login manager configuration
+LOGIN_DISABLED = False
